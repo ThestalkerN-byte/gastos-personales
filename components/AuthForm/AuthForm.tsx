@@ -1,14 +1,51 @@
 "use client";
-import { useState } from "react";
+import {
+  useState,
+  useActionState,
+  useEffect,
+  useRef,
+  startTransition,
+} from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Lock, User, Eye, EyeOff } from "lucide-react";
-import { registerAction } from "@/app/actions";
+import { loginAction, registerAction } from "@/app/actions";
+import { toast } from "sonner";
+
 export function AuthForm() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [stateRegister, formPendingRegister, isPendingRegister] =
+    useActionState(registerAction, null);
+  const [stateLogin, formPendingLogin, isPendingLogin] = useActionState(
+    loginAction,
+    null,
+  );
+  const [tabView, setTabView] = useState<"login" | "register">("login");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleReset = (tabToRedirect: "login" | "register") => {
+    formRef.current?.reset();
+    setTabView(tabToRedirect);
+  };
+
+  useEffect(() => {
+    console.log("Estado de registro:", stateRegister);
+    if (stateRegister?.success) {
+      // startTransition le dice a React que este cambio de estado es una "transición"
+      // y no un renderizado síncrono crítico.
+      startTransition(() => {
+        handleReset("login");
+      });
+    }
+    if (stateLogin?.success) {
+      startTransition(() => {
+        handleReset("login");
+      });
+    }
+  }, [stateRegister, stateLogin]);
 
   return (
     <div className="flex min-h-svh items-center justify-center px-4">
@@ -25,20 +62,36 @@ export function AuthForm() {
           </p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue={tabView} value={tabView} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-secondary">
-            <TabsTrigger value="login" className="text-sm">
+            <TabsTrigger
+              onClick={() => setTabView("login")}
+              value="login"
+              className="text-sm"
+            >
               Iniciar sesion
             </TabsTrigger>
-            <TabsTrigger value="register" className="text-sm">
+            <TabsTrigger
+              onClick={() => setTabView("register")}
+              value="register"
+              className="text-sm"
+            >
               Registrarse
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="mt-6">
             <form
+              ref={formRef}
               onSubmit={async (e) => {
                 e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                console.log(formData, "formulario");
+                const result = await loginAction(stateLogin, formData);
+                console.log("Resultado del login:", result);
+                if (result?.success) {
+                  toast.success(result.message);
+                }
               }}
               className="flex flex-col gap-4"
             >
@@ -52,6 +105,7 @@ export function AuthForm() {
                 <div className="relative">
                   <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
+                    name="usuario"
                     id="login-user"
                     type="text"
                     placeholder="Tu nombre de usuario"
@@ -71,6 +125,7 @@ export function AuthForm() {
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
+                    name="password"
                     id="login-password"
                     type={showLoginPassword ? "text" : "password"}
                     placeholder="Tu contrasena"
@@ -78,6 +133,7 @@ export function AuthForm() {
                     autoComplete="current-password"
                   />
                   <button
+                    disabled={isPendingLogin}
                     type="button"
                     onClick={() => setShowLoginPassword(!showLoginPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
@@ -97,6 +153,7 @@ export function AuthForm() {
               </div>
 
               <Button
+                disabled={isPendingLogin}
                 type="submit"
                 className="mt-2 h-10 w-full text-sm font-medium"
               >
@@ -107,11 +164,16 @@ export function AuthForm() {
 
           <TabsContent value="register" className="mt-6">
             <form
+              ref={formRef}
               onSubmit={async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
-                const result = await registerAction({ formData });
+                const result = await registerAction(stateRegister, formData);
                 console.log("Resultado del registro:", result);
+                if (result?.success) {
+                  toast.success(result.message);
+                  setTabView("login"); // Volver a la pestaña de login después de un registro exitoso
+                }
               }}
               className="flex flex-col gap-4"
             >
@@ -140,7 +202,7 @@ export function AuthForm() {
                   htmlFor="register-password"
                   className="text-xs uppercase tracking-wider text-muted-foreground"
                 >
-                  Contrasena
+                  Contraseña
                 </Label>
                 <div className="relative">
                   <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -153,11 +215,12 @@ export function AuthForm() {
                     autoComplete="new-password"
                   />
                   <button
+                    disabled={isPendingRegister}
                     type="button"
                     onClick={() =>
                       setShowRegisterPassword(!showRegisterPassword)
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors "
                     aria-label={
                       showRegisterPassword
                         ? "Ocultar contrasena"
@@ -174,8 +237,9 @@ export function AuthForm() {
               </div>
 
               <Button
+                disabled={isPendingRegister}
                 type="submit"
-                className="mt-2 h-10 w-full text-sm font-medium"
+                className="mt-2 h-10 w-full text-sm font-medium cursor-pointer disabled:cursor-not-allowed disabled:text-muted-foreground/50"
               >
                 Crear cuenta
               </Button>
