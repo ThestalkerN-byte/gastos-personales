@@ -1,7 +1,6 @@
 import { AuthForm } from "@/components/AuthForm/AuthForm";
-import Image from "next/image";
 
-export default function Home() {
+export default function Formpage() {
   return (
     <div>
       <AuthForm></AuthForm>
