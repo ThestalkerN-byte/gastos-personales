@@ -1,7 +1,7 @@
 "use client"
 
 import { User, LogOut, Settings } from "lucide-react"
-
+import { logoutAction } from "@/app/_actions/user/actions"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -43,7 +43,9 @@ export function AppHeader() {
               Configuracion
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive">
+            <DropdownMenuItem onClick={async ()=>{
+              await logoutAction();
+            }} className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 size-4" />
               Cerrar sesion
             </DropdownMenuItem>

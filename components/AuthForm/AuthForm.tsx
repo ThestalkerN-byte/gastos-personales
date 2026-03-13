@@ -11,7 +11,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Lock, User, Eye, EyeOff } from "lucide-react";
-import { loginAction, registerAction } from "@/app/actions";
+import { loginAction, registerAction } from "@/app/_actions/user/actions";
 import { toast } from "sonner";
 
 export function AuthForm() {

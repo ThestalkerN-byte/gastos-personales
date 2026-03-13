@@ -1,10 +1,10 @@
 export interface Gasto {
-  id: string;
+  readonly id: string;
   motivo: string;
   monto: number;
   cantidad_cuotas: number;
-  categoriaId: string;
-  usuarioId: string;
-  tarjetaId: string;
-  createdAt: Date;
+  categoria_id: string;
+  usuario_id: string;
+  tarjeta_id: string;
+  readonly createdAt: Date;
 }

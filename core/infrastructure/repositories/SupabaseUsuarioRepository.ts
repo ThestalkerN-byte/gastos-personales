@@ -34,15 +34,18 @@ export class SupabaseUsuarioRepository implements IUsuarioRepository {
     }
     return this.mapToDomain(data);
   }
-  async login(usuario: string, password: string): Promise<Usuario  | null> {
+  async login(usuario: string, password: string): Promise<Usuario | null> {
     const user = await this.findById(usuario);
-    if (!user) return null
+    if (!user) return null;
+    console.log("user en login", user);
     //Comparo las contraseñas para saber si coinciden
     const isValid = await verifyPassword(password, user.password);
-    if(isValid) {
-        return user
+    console.log("Resultado de la verificación de contraseña:", isValid);
+    if (isValid) {
+      return user;
     }
-    return null
+    console.log("hubo un error y retorna null");
+    return null;
   }
   async delete(usuario: Usuario): Promise<void> {}
   async updateData(usuario: Usuario): Promise<void> {}

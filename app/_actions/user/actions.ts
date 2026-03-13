@@ -54,11 +54,15 @@ export async function loginAction(
   let isSuccess = false;
   try {
     // 3. Ejecución del caso de uso (que ya valida con Zod e interactúa con Infra)
-    await useCase.execute(data);
-
+    const user = await useCase.execute(data);
+    console.log("Resultado del login:", user);
     // Si el flujo continúa es porque fue exitoso
     const cookieStore = await cookies();
-    cookieStore.set("name", data.usuario as string);
+    cookieStore.set("user_session", JSON.stringify(user), {
+      httpOnly: true,
+      secure: true,
+      maxAge: 60 * 60 * 24 * 7, // 1 semana
+    });
 
     isSuccess = true;
   } catch (error: unknown) {
@@ -70,4 +74,20 @@ export async function loginAction(
     redirect("/home");
   }
   return { success: isSuccess, message: "Login exitoso" };
+}
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete("user_session");
+  redirect('/');
+}
+
+
+export async function setCookiesAction(
+  prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const data = Object.fromEntries(formData.entries());
+  const cookieStore = await cookies();
+  cookieStore.set("name", data.usuario as string);
+  return { success: true, message: "Cookie establecida" };
 }
