@@ -10,9 +10,17 @@ export class LoginUser {
       );
     }
     const user = await this.usuarioRepository.findById(validation.data.usuario);
-    if(!user) {
-        throw new Error("Usuario no encontrado");
+    if (!user) {
+      throw new Error("Usuario no encontrado");
     }
-    return await this.usuarioRepository.login(validation.data.usuario, validation.data.password);
+    const userLoged = await this.usuarioRepository.login(
+      validation.data.usuario,
+      validation.data.password,
+    );
+
+    if (!userLoged) {
+      throw new Error("Credenciales incorrectas");
+    }
+    return userLoged;
   }
 }
