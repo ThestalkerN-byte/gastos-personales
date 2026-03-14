@@ -14,7 +14,7 @@ export class SupabaseGastoRepository implements IGastoRepository {
       tarjeta_id: gasto?.tarjeta_id,
     });
 
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(error.message + 'Error en gasto');
   }
   async delete(gasto: Gasto): Promise<void> {
     const { error } = await supabase.from("gastos").delete().eq("id", gasto.id);

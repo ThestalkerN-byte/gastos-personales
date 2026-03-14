@@ -3,7 +3,7 @@ import { GastoInput, GastoSchema } from "@/core/domain/schemas/gasto.schema";
 
 export class CreateGasto {
     constructor(private gastoRepository: IGastoRepository) {}
-    async execute(gastoData:GastoInput){
+    async execute(gastoData:unknown){
         // primer paso validar el schema con zod
         const validation  = GastoSchema.safeParse(gastoData);
         if(!validation.success){

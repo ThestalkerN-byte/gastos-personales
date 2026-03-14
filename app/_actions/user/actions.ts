@@ -4,7 +4,6 @@ import { SupabaseUsuarioRepository } from "@/core/infrastructure/repositories/Su
 import { CreateUser } from "@/core/application/uses-cases/CreateUser";
 import { ActionState } from "@/lib/interfaces";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { LoginUser } from "@/core/application/uses-cases/LoginUser";
 
@@ -80,7 +79,6 @@ export async function logoutAction() {
   cookieStore.delete("user_session");
   redirect('/');
 }
-
 
 export async function setCookiesAction(
   prevState: ActionState,
