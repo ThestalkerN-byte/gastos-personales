@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
@@ -26,29 +26,20 @@ import {
 } from "@/components/ui/select";
 import { GastoInput, GastoSchema } from "@/core/domain/schemas/gasto.schema";
 import { useUser } from "@/context/UserContext";
-
-// // Datos de ejemplo - en produccion vendrian de la base de datos
-const categorias = [
-  { id: "1", nombre: "Alimentacion" },
-  { id: "2", nombre: "Transporte" },
-  { id: "3", nombre: "Entretenimiento" },
-  { id: "4", nombre: "Servicios" },
-  { id: "5", nombre: "Salud" },
-]
-
-const tarjetas = [
-  { id: "1", nombre: "Visa **** 1234", tipo: "credito" },
-  { id: "2", nombre: "Mastercard **** 5678", tipo: "credito" },
-  { id: "3", nombre: "Debito **** 9012", tipo: "debito" },
-]
-
+import { getCategorias } from "@/app/_actions/categorias/actions";
+import { Categoria } from "@/core/domain/entities/Categorias";
+import { Tarjeta } from "@/core/domain/entities/Tarjeta";
+import { getTarjetas } from "@/app/_actions/tarjetas/actions";
+import { createGastoAction } from "@/app/_actions/gasto/actions";
 // // Usuario simulado - en produccion vendria de la sesion
 // const usuarioActual = { id: "user-1", nombre: "Usuario Demo" }
 
 export function GastoFormModal() {
   const [open, setOpen] = useState(false);
   const [selectedTarjeta, setSelectedTarjeta] = useState<string | undefined>();
-  const {user} = useUser();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
+  const { user } = useUser();
   const tarjetaSeleccionada = tarjetas.find((t) => t.id === selectedTarjeta);
   const esDebito = tarjetaSeleccionada?.tipo === "debito";
 
@@ -62,39 +53,47 @@ export function GastoFormModal() {
   } = useForm<GastoInput>({
     resolver: zodResolver(GastoSchema),
     defaultValues: {
-      usuario_id: user?.id ?? '',
-      categoria_id: '',
+      usuario_id: user?.id ?? "",
+      categoria_id: "",
     },
   });
+
+  // funciones de carga reutilizables
+  const loadTarjetas = async () => {
+    try {
+      if (!user?.id) return;
+      const data = await getTarjetas(user.id);
+      setTarjetas(data);
+    } catch (error) {
+      console.error("Error cargando tarjetas:", error);
+    }
+  };
+
+  const loadCategorias = async () => {
+    try {
+      const data = await getCategorias();
+      setCategorias(data);
+      // Setear categoría por defecto "sin especificar" si existe
+      const categoriaSinEspecificar = data.find((cat) => cat.nombre === "sin especificar");
+      if (categoriaSinEspecificar) {
+        setValue("categoria_id", categoriaSinEspecificar.id);
+      }
+    } catch (error) {
+      console.error("Error cargando categorías:", error);
+    }
+  };
+
+  // Cargar al montar
+  useEffect(() => {
+    loadCategorias();
+    loadTarjetas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Si el usuario no está cargado, no renderizar el formulario
   if (!user?.id) {
     return <p className="text-sm text-destructive">Cargando usuario...</p>;
   }
-
-  const onSubmit = async (data: GastoInput) => {
-    // Validar que usuario_id y categoria_id estén presentes
-    if (!data.usuario_id || !data.categoria_id) {
-      alert("Debes seleccionar usuario y categoría");
-      return;
-    }
-    // Si es debito, remover cantidad_cuotas
-    if (esDebito) {
-      delete data.cantidad_cuotas;
-    }
-    // Forzar cantidad_cuotas a number o undefined
-    if (data.cantidad_cuotas !== undefined && data.cantidad_cuotas !== null) {
-      data.cantidad_cuotas = Number(data.cantidad_cuotas);
-      if (isNaN(data.cantidad_cuotas)) delete data.cantidad_cuotas;
-    }
-
-    console.log("Gasto creado:", data);
-    // Aqui iria la logica para enviar el gasto al backend
-
-    reset();
-    setSelectedTarjeta(undefined);
-    setOpen(false);
-  };
 
   const handleTarjetaChange = (value: string) => {
     if (value === "none") {
@@ -114,7 +113,10 @@ export function GastoFormModal() {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    if (!isOpen) {
+    if (isOpen) {
+      // Al abrir el modal, refrescar las tarjetas para incluir nuevas creadas
+      loadTarjetas();
+    } else {
       reset();
       setSelectedTarjeta(undefined);
     }
@@ -135,7 +137,27 @@ export function GastoFormModal() {
             Completa los campos para registrar un nuevo gasto.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={handleSubmit(async (data) => {
+            // data viene validado por Zod vía zodResolver
+            const formData = new FormData();
+            Object.entries(data).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                formData.append(key, String(value));
+              }
+            });
+
+            const result = await createGastoAction(formData);
+            if (result?.success) {
+              reset();
+              setSelectedTarjeta(undefined);
+              setOpen(false);
+            } else {
+              console.error("Error creando gasto:", result?.message);
+            }
+          })}
+          className="space-y-4"
+        >
           {/* Motivo */}
           <div className="space-y-2">
             <Label htmlFor="motivo">Motivo</Label>
