@@ -1,5 +1,8 @@
-'use server";'
+"use server";
+
 import { CreateGasto } from "@/core/application/uses-cases/CreateGasto";
+import { GetGastosByFilters } from "@/core/application/uses-cases/GetGastosByFilters";
+import { Gasto } from "@/core/domain/entities/Gasto";
 import { SupabaseGastoRepository } from "@/core/infrastructure/repositories/SupabaseGastoRepository";
 import { GastoSchema } from "@/core/domain/schemas/gasto.schema";
 import { ActionState } from "@/lib/interfaces";
@@ -30,5 +33,21 @@ export async function createGastoAction(
     return { success: true, message: "Gasto creado correctamente" };
   } catch (error: unknown) {
     return { success: false, message: (error as Error).message };
+  }
+}
+
+export async function getGastosByFilters(filters: {
+  usuario_id: string;
+  mes: number;
+  anio: number;
+  tarjeta_id?: string;
+  categoria_id?: string;
+}): Promise<Gasto[]> {
+  const repository = new SupabaseGastoRepository();
+  const useCase = new GetGastosByFilters(repository);
+  try {
+    return await useCase.execute(filters);
+  } catch (error: unknown) {
+    throw new Error((error as Error).message);
   }
 }

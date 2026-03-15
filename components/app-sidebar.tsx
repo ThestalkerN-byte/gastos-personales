@@ -5,10 +5,6 @@ import { usePathname } from "next/navigation"
 import {
   Home,
   Settings,
-  Users,
-  FileText,
-  BarChart3,
-  Mail,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
