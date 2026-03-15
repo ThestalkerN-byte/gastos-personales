@@ -31,10 +31,13 @@ import { Categoria } from "@/core/domain/entities/Categorias";
 import { Tarjeta } from "@/core/domain/entities/Tarjeta";
 import { getTarjetas } from "@/app/_actions/tarjetas/actions";
 import { createGastoAction } from "@/app/_actions/gasto/actions";
-// // Usuario simulado - en produccion vendria de la sesion
-// const usuarioActual = { id: "user-1", nombre: "Usuario Demo" }
+import { toast } from "sonner";
 
-export function GastoFormModal() {
+interface GastoFormModalProps {
+  onSuccess?: () => void;
+}
+
+export function GastoFormModal({ onSuccess }: GastoFormModalProps) {
   const [open, setOpen] = useState(false);
   const [selectedTarjeta, setSelectedTarjeta] = useState<string | undefined>();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -149,11 +152,13 @@ export function GastoFormModal() {
 
             const result = await createGastoAction(formData);
             if (result?.success) {
+              toast.success("Gasto registrado correctamente");
               reset();
               setSelectedTarjeta(undefined);
               setOpen(false);
+              onSuccess?.();
             } else {
-              console.error("Error creando gasto:", result?.message);
+              toast.error(result?.message ?? "Error al crear gasto");
             }
           })}
           className="space-y-4"
