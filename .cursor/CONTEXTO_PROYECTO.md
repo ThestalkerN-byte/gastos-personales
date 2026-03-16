@@ -202,6 +202,7 @@ export async function registerAction(
 |------|---------|-------------|
 | `/` | `app/page.tsx` | AuthForm (login/registro) |
 | `/home` | `app/home/page.tsx` | HomeDashboard: ResumenCard, GastosModule, IngresosModule (tabs), TarjetaForm |
+| `/home/tarjetas` | `app/home/tarjetas/page.tsx` | TarjetasView: tarjetas seleccionables + GastoTable filtrado |
 | `/home/settings` | — | Referenciada en sidebar; puede no existir |
 
 - Layout raíz: fuentes, Toaster, UserProvider.

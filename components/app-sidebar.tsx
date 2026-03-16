@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import {
   Home,
   Settings,
+  CreditCard,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -28,6 +29,11 @@ const menuItems = [
     title: "Inicio",
     url: "/home",
     icon: Home,
+  },
+  {
+    title: "Tarjetas",
+    url: "/home/tarjetas",
+    icon: CreditCard,
   },
 ]
 

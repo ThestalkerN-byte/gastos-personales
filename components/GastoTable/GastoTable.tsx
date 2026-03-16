@@ -66,7 +66,17 @@ function formatearMonto(monto: number) {
   }).format(monto);
 }
 
-export function GastoTable() {
+interface GastoTableProps {
+  /** Filtro fijo por tarjeta; cuando se pasa, oculta el selector de tarjeta */
+  tarjetaIdFilter?: string;
+  /** Ocultar el selector de tarjeta (para vistas que filtran por tarjeta) */
+  hideTarjetaFilter?: boolean;
+}
+
+export function GastoTable({
+  tarjetaIdFilter,
+  hideTarjetaFilter = false,
+}: GastoTableProps = {}) {
   const { user } = useUser();
   const [gastos, setGastos] = useState<Gasto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -77,6 +87,8 @@ export function GastoTable() {
   const [categoriaId, setCategoriaId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
+  const effectiveTarjetaId = tarjetaIdFilter ?? tarjetaId;
+
   const cargarDatos = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -86,7 +98,7 @@ export function GastoTable() {
           usuario_id: user.id,
           mes,
           anio,
-          tarjeta_id: tarjetaId && tarjetaId !== "all" ? tarjetaId : undefined,
+          tarjeta_id: effectiveTarjetaId && effectiveTarjetaId !== "all" ? effectiveTarjetaId : undefined,
           categoria_id: categoriaId && categoriaId !== "all" ? categoriaId : undefined,
         }),
         getCategorias(),
@@ -101,7 +113,7 @@ export function GastoTable() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, mes, anio, tarjetaId, categoriaId]);
+  }, [user?.id, mes, anio, effectiveTarjetaId, categoriaId]);
 
   useEffect(() => {
     cargarDatos();
@@ -159,22 +171,24 @@ export function GastoTable() {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tarjeta">Tarjeta</Label>
-            <Select value={tarjetaId} onValueChange={setTarjetaId}>
-              <SelectTrigger id="tarjeta" className="w-[180px]">
-                <SelectValue placeholder="Todas las tarjetas" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las tarjetas</SelectItem>
-                {tarjetas.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!hideTarjetaFilter && (
+            <div className="space-y-2">
+              <Label htmlFor="tarjeta">Tarjeta</Label>
+              <Select value={tarjetaId} onValueChange={setTarjetaId}>
+                <SelectTrigger id="tarjeta" className="w-[180px]">
+                  <SelectValue placeholder="Todas las tarjetas" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las tarjetas</SelectItem>
+                  {tarjetas.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="categoria">Categoría</Label>

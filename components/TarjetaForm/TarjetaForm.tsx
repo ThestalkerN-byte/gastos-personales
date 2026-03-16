@@ -27,8 +27,13 @@ import {
 import { TarjetaInput, TarjetaSchema } from "@/core/domain/schemas/tarjeta.schema";
 import { useUser } from "@/context/UserContext";
 import { createTarjetaAction } from "@/app/_actions/tarjetas/actions";
+import { toast } from "sonner";
 
-export function TarjetaFormModal() {
+interface TarjetaFormModalProps {
+  onSuccess?: () => void;
+}
+
+export function TarjetaFormModal({ onSuccess }: TarjetaFormModalProps) {
   const [open, setOpen] = useState(false);
   const { user } = useUser();
 
@@ -83,10 +88,12 @@ export function TarjetaFormModal() {
 
             const result = await createTarjetaAction(formData);
             if (result?.success) {
+              toast.success("Tarjeta creada correctamente");
               reset();
               setOpen(false);
+              onSuccess?.();
             } else {
-              console.error("Error creando tarjeta:", result?.message);
+              toast.error(result?.message ?? "Error al crear tarjeta");
             }
           })}
           className="space-y-4"
