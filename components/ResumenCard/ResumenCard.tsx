@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useUser } from "@/context/UserContext";
 import { getResumenMensual } from "@/app/_actions/resumen/actions";
-import { TrendingUp, TrendingDown, Wallet, Receipt } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Receipt, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -53,6 +53,7 @@ export function ResumenCard({ refreshKey = 0 }: ResumenCardProps) {
   const [data, setData] = useState<{
     totalIngresos: number;
     totalGastos: number;
+    totalReembolsos: number;
     balance: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +70,7 @@ export function ResumenCard({ refreshKey = 0 }: ResumenCardProps) {
       setData(resumen);
     } catch (error) {
       console.error("Error cargando resumen:", error);
-      setData({ totalIngresos: 0, totalGastos: 0, balance: 0 });
+      setData({ totalIngresos: 0, totalGastos: 0, totalReembolsos: 0, balance: 0 });
     } finally {
       setLoading(false);
     }
@@ -133,7 +134,7 @@ export function ResumenCard({ refreshKey = 0 }: ResumenCardProps) {
       {loading ? (
         <Skeleton className="h-24 w-full rounded-md" />
       ) : data ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
             <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Wallet className="h-5 w-5" />
@@ -158,6 +159,18 @@ export function ResumenCard({ refreshKey = 0 }: ResumenCardProps) {
             </div>
           </div>
 
+          <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-4">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <RotateCcw className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total reembolsos</p>
+              <p className="text-lg font-semibold text-card-foreground">
+                {formatearMonto(data.totalReembolsos)}
+              </p>
+            </div>
+          </div>
+
           <div
             className={`flex items-center gap-3 rounded-lg border p-4 ${
               data.balance >= 0
@@ -178,7 +191,7 @@ export function ResumenCard({ refreshKey = 0 }: ResumenCardProps) {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">
-                Balance (ingreso − gasto)
+                Balance (ingreso − gasto + reembolsos)
               </p>
               <p
                 className={`text-lg font-semibold ${

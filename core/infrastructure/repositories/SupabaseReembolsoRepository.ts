@@ -2,6 +2,7 @@ import { supabase } from "../db/DBClient";
 import { IReembolsoRepository } from "../../domain/repositories/IReembolsoRepository";
 import { Reembolso } from "../../domain/entities/Reembolso";
 import { ReembolsoInput } from "@/core/domain/schemas/reembolso.schema";
+import { ResumenFiltersInput } from "@/core/domain/schemas/resumen-filters.schema";
 
 export class SupabaseReembolsoRepository implements IReembolsoRepository {
   async save(reembolso: ReembolsoInput): Promise<void> {
@@ -41,6 +42,23 @@ export class SupabaseReembolsoRepository implements IReembolsoRepository {
       .from("reembolsos")
       .select("*")
       .eq("usuario_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return this.mapRows(data ?? []);
+  }
+
+  async findByFilters(filters: ResumenFiltersInput): Promise<Reembolso[]> {
+    const startDate = `${filters.anio}-${String(filters.mes).padStart(2, "0")}-01`;
+    const endDate = new Date(filters.anio, filters.mes, 0);
+    const endDateStr = endDate.toISOString().split("T")[0];
+
+    const { data, error } = await supabase
+      .from("reembolsos")
+      .select("*")
+      .eq("usuario_id", filters.usuario_id)
+      .gte("created_at", `${startDate}T00:00:00.000Z`)
+      .lte("created_at", `${endDateStr}T23:59:59.999Z`)
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(error.message);
