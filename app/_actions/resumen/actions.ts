@@ -3,6 +3,7 @@
 import { GetResumenMensual } from "@/core/application/uses-cases/GetResumenMensual";
 import { SupabaseGastoRepository } from "@/core/infrastructure/repositories/SupabaseGastoRepository";
 import { SupabaseIngresoRepository } from "@/core/infrastructure/repositories/SupabaseIngresoRepository";
+import { SupabaseReembolsoRepository } from "@/core/infrastructure/repositories/SupabaseReembolsoRepository";
 import { ResumenMensual } from "@/core/domain/schemas/resumen-filters.schema";
 
 export async function getResumenMensual(filters: {
@@ -12,7 +13,12 @@ export async function getResumenMensual(filters: {
 }): Promise<ResumenMensual> {
   const ingresoRepository = new SupabaseIngresoRepository();
   const gastoRepository = new SupabaseGastoRepository();
-  const useCase = new GetResumenMensual(ingresoRepository, gastoRepository);
+  const reembolsoRepository = new SupabaseReembolsoRepository();
+  const useCase = new GetResumenMensual(
+    ingresoRepository,
+    gastoRepository,
+    reembolsoRepository
+  );
 
   try {
     return await useCase.execute(filters);

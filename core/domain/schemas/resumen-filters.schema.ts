@@ -11,5 +11,6 @@ export type ResumenFiltersInput = z.infer<typeof ResumenFiltersSchema>;
 export interface ResumenMensual {
   totalIngresos: number;
   totalGastos: number;
+  totalReembolsos: number;
   balance: number;
 }
