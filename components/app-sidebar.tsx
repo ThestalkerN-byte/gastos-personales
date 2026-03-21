@@ -6,6 +6,7 @@ import {
   Home,
   Settings,
   CreditCard,
+  PiggyBank,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -34,6 +35,11 @@ const menuItems = [
     title: "Tarjetas",
     url: "/home/tarjetas",
     icon: CreditCard,
+  },
+  {
+    title: "Ahorros",
+    url: "/home/ahorros",
+    icon: PiggyBank,
   },
 ]
 

@@ -13,8 +13,9 @@ gastos-personales/
 │   │   ├── categorias/actions.ts
 │   │   ├── gasto/actions.ts
 │   │   ├── ingreso/actions.ts
+│   │   ├── meta-ahorro/actions.ts
 │   │   ├── reembolso/actions.ts
-│   │   └── resumen/actions.ts
+│   │   ├── resumen/actions.ts
 │   │   ├── tarjetas/actions.ts
 │   │   └── user/actions.ts
 │   ├── home/
@@ -33,6 +34,11 @@ gastos-personales/
 │   ├── IngresosModule/
 │   ├── IngresoForm/
 │   ├── IngresoTable/
+│   ├── ContribucionForm/
+│   ├── DeleteMetaAhorroForm/
+│   ├── MetaAhorroCard/
+│   ├── MetaAhorroForm/
+│   ├── MetasAhorroView/
 │   ├── ReembolsoForm/
 │   ├── ResumenCard/
 │   ├── TarjetaForm/
@@ -80,6 +86,8 @@ gastos-personales/
 - `Categorias.ts` — Categoria (id, nombre)
 - `Ingreso.ts` — id, monto, categoria_id, descripcion, usuario_id, createdAt
 - `Reembolso.ts` — id, gasto_id, usuario_id, monto, de_quien, descripcion, createdAt
+- `MetaAhorro.ts` — id, usuario_id, nombre, monto_objetivo, monto_actual, descripcion, createdAt
+- `MovimientoAhorro.ts` — id, meta_ahorro_id, usuario_id, monto, descripcion, createdAt
 
 ### Schemas Zod (`core/domain/schemas/`)
 
@@ -89,6 +97,7 @@ Cada dominio tiene un schema para validación:
 - `ingreso.schema.ts` → `IngresoSchema`, `IngresoInput`
 - `ingreso-filters.schema.ts` → `IngresoFiltersSchema`, `IngresoFiltersInput`
 - `reembolso.schema.ts` → `ReembolsoSchema`, `ReembolsoInput`
+- `meta-ahorro.schema.ts` → `MetaAhorroSchema`, `MetaAhorroInput`, `ContribucionAhorroSchema`
 - `resumen-filters.schema.ts` → `ResumenFiltersSchema`, `ResumenMensual`
 - `tarjeta.schema.ts` → `TarjetaSchema`, `TarjetaInput`
 - `usuario.schema.ts` → `UsuarioInputSchema`, `UsuarioInput`
@@ -100,14 +109,14 @@ Cada dominio tiene un schema para validación:
 
 **Interfaces** (`core/domain/repositories/`):
 
-- `IUsuarioRepository`, `IGastoRepository`, `IIngresoRepository`, `IReembolsoRepository`, `ITarjetaRepository`, `ICategoriaRepository`
+- `IUsuarioRepository`, `IGastoRepository`, `IIngresoRepository`, `IReembolsoRepository`, `IMetaAhorroRepository`, `ITarjetaRepository`, `ICategoriaRepository`
 - Nomenclatura: `I` + Nombre + `Repository`
 
 **Implementaciones** (`core/infrastructure/repositories/`):
 
 - `SupabaseUsuarioRepository`, `SupabaseGastoRepository`, etc.
 - Nomenclatura: `Supabase` + Nombre + `Repository`
-- Tablas Supabase: `usuarios`, `gastos`, `ingresos`, `reembolsos`, `tarjetas`, `categorias`
+- Tablas Supabase: `usuarios`, `gastos`, `ingresos`, `reembolsos`, `metas_ahorro`, `movimientos_ahorro`, `tarjetas`, `categorias`
 
 Los repositorios **no validan**; asumen datos ya validados por el caso de uso.
 
@@ -203,6 +212,7 @@ export async function registerAction(
 | `/` | `app/page.tsx` | AuthForm (login/registro) |
 | `/home` | `app/home/page.tsx` | HomeDashboard: ResumenCard, GastosModule, IngresosModule (tabs), TarjetaForm |
 | `/home/tarjetas` | `app/home/tarjetas/page.tsx` | TarjetasView: tarjetas seleccionables + GastoTable filtrado |
+| `/home/ahorros` | `app/home/ahorros/page.tsx` | MetasAhorroView: metas de ahorro con contribuciones |
 | `/home/settings` | — | Referenciada en sidebar; puede no existir |
 
 - Layout raíz: fuentes, Toaster, UserProvider.
