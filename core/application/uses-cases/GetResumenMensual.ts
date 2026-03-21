@@ -32,7 +32,7 @@ export class GetResumenMensual {
 
     const totalIngresos = ingresos.reduce((acc, i) => acc + (i.monto ?? 0), 0);
     const totalGastos = gastos.reduce((acc, g) => acc + (g.monto ?? 0), 0);
-    const totalReembolsos = reembolsos.reduce((acc, r) => acc + r.monto, 0);
+    const totalReembolsos = reembolsos.reduce((acc, r) => acc + (r.monto ?? 0), 0);
     const balance = totalIngresos - totalGastos + totalReembolsos;
 
     return {
