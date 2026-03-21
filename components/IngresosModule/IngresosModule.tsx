@@ -16,7 +16,7 @@ interface IngresosModuleProps {
 export function IngresosModule({ onDataChanged }: IngresosModuleProps) {
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleIngresoCreated = useCallback(() => {
+  const handleIngresoChange = useCallback(() => {
     setRefreshKey((k) => k + 1);
     onDataChanged?.();
   }, [onDataChanged]);
@@ -44,10 +44,10 @@ export function IngresosModule({ onDataChanged }: IngresosModuleProps) {
             </p>
           </div>
         </div>
-        <IngresoFormModal onSuccess={handleIngresoCreated} />
+        <IngresoFormModal onSuccess={handleIngresoChange} />
       </div>
 
-      <IngresoTable key={refreshKey} />
+      <IngresoTable key={refreshKey} onSuccess={handleIngresoChange} />
     </section>
   );
 }

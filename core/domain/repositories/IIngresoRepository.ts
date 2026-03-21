@@ -4,7 +4,7 @@ import { IngresoFiltersInput } from "../schemas/ingreso-filters.schema";
 
 export interface IIngresoRepository {
   save(ingreso: IngresoInput): Promise<void>;
-  delete(ingreso: Ingreso): Promise<void>;
+  delete(ingreso: Ingreso): Promise<boolean|void>;
   findByUserId(userId: string): Promise<Ingreso[]>;
   findByFilters(filters: IngresoFiltersInput): Promise<Ingreso[]>;
 }

@@ -35,10 +35,10 @@ export function HomeDashboard() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="gastos" className="mt-6">
-          <GastosModule onDataChanged={handleDataChanged} />
+          <GastosModule  onDataChanged={handleDataChanged} />
         </TabsContent>
         <TabsContent value="ingresos" className="mt-6">
-          <IngresosModule onDataChanged={handleDataChanged} />
+          <IngresosModule  onDataChanged={handleDataChanged} />
         </TabsContent>
       </Tabs>
     </div>

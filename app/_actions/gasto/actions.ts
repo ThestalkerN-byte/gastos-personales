@@ -6,6 +6,7 @@ import { Gasto } from "@/core/domain/entities/Gasto";
 import { SupabaseGastoRepository } from "@/core/infrastructure/repositories/SupabaseGastoRepository";
 import { GastoSchema } from "@/core/domain/schemas/gasto.schema";
 import { ActionState } from "@/lib/interfaces";
+import { DeleteGasto } from "@/core/application/uses-cases/DeleteGasto";
 
 export async function createGastoAction(
   formData: FormData,
@@ -47,6 +48,17 @@ export async function getGastosByFilters(filters: {
   const useCase = new GetGastosByFilters(repository);
   try {
     return await useCase.execute(filters);
+  } catch (error: unknown) {
+    throw new Error((error as Error).message);
+  }
+}
+
+export async function deleteGastoAction(gasto:Gasto) {
+  const repository = new SupabaseGastoRepository();
+  const useCase = new DeleteGasto(repository);
+  try {
+   const result =  await useCase.execute(gasto);
+   return result;
   } catch (error: unknown) {
     throw new Error((error as Error).message);
   }

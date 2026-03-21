@@ -16,13 +16,14 @@ export class SupabaseIngresoRepository implements IIngresoRepository {
     if (error) throw new Error(error.message + " Error en ingreso");
   }
 
-  async delete(ingreso: Ingreso): Promise<void> {
+  async delete(ingreso: Ingreso): Promise<boolean|void> {
     const { error } = await supabase
       .from("ingresos")
       .delete()
       .eq("id", ingreso.id);
 
     if (error) throw new Error(error.message);
+    return true;
   }
 
   async findByUserId(userId: string): Promise<Ingreso[]> {

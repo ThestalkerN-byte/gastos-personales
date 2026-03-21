@@ -26,7 +26,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { IngresoFormModal } from "../IngresoForm/IngresoForm";
+import { DeleteIngresoForm } from "../DeleteIngresoForm/DeleteIngresoForm";
+interface IngresoTableProps {
+    /** Filtro opcional por categoría */
+    categoriaIdFilter?: string;
+    /** Callback opcional para notificar cambios (ej: para refrescar resumen) */
+    onSuccess?: () => void;
+}
 const MESES = [
   { valor: 1, nombre: "Enero" },
   { valor: 2, nombre: "Febrero" },
@@ -63,7 +70,10 @@ function formatearMonto(monto: number) {
   }).format(monto);
 }
 
-export function IngresoTable() {
+export function IngresoTable({
+  categoriaIdFilter,  
+  onSuccess,
+}: IngresoTableProps = {}) {
   const { user } = useUser();
   const [ingresos, setIngresos] = useState<Ingreso[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -180,6 +190,7 @@ export function IngresoTable() {
                 <TableHead>Categoría</TableHead>
                 <TableHead>Fecha</TableHead>
                 <TableHead className="text-right">Monto</TableHead>
+                <TableHead className="w-[100px]">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -208,6 +219,9 @@ export function IngresoTable() {
                     </TableCell>
                     <TableCell className="text-right">
                       {formatearMonto(ingreso.monto)}
+                    </TableCell>
+                    <TableCell>
+                        <DeleteIngresoForm ingreso={ingreso} onSuccess={onSuccess} />
                     </TableCell>
                   </TableRow>
                 ))

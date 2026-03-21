@@ -91,6 +91,8 @@ export function AuthForm() {
                 console.log("Resultado del login:", result);
                 if (result?.success) {
                   toast.success(result.message);
+                }else{
+                  toast.error(result?.message ?? "Error al iniciar sesion");
                 }
               }}
               className="flex flex-col gap-4"
@@ -173,6 +175,8 @@ export function AuthForm() {
                 if (result?.success) {
                   toast.success(result.message);
                   setTabView("login"); // Volver a la pestaña de login después de un registro exitoso
+                }else{
+                  toast.error(result?.message ?? "Error al crear cuenta");
                 }
               }}
               className="flex flex-col gap-4"

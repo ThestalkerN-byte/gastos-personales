@@ -1,6 +1,7 @@
 "use server";
 
 import { CreateIngreso } from "@/core/application/uses-cases/CreateIngreso";
+import { DeleteIngreso } from "@/core/application/uses-cases/DeleteIngreso";
 import { GetIngresosByFilters } from "@/core/application/uses-cases/GetIngresosByFilters";
 import { Ingreso } from "@/core/domain/entities/Ingreso";
 import { SupabaseIngresoRepository } from "@/core/infrastructure/repositories/SupabaseIngresoRepository";
@@ -31,6 +32,17 @@ export async function getIngresosByFilters(filters: {
   const useCase = new GetIngresosByFilters(repository);
   try {
     return await useCase.execute(filters);
+  } catch (error: unknown) {
+    throw new Error((error as Error).message);
+  }
+}
+
+export async function deleteIngresoAction(ingreso: Ingreso) {
+  const repository = new SupabaseIngresoRepository();
+  const useCase = new DeleteIngreso(repository);
+  try {
+   const result =  await useCase.execute(ingreso);
+   return result;
   } catch (error: unknown) {
     throw new Error((error as Error).message);
   }

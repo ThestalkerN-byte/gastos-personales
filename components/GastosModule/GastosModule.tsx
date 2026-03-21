@@ -3,6 +3,7 @@
 import { Receipt } from "lucide-react";
 import { GastoFormModal } from "@/components/GastoForm/GastoForm";
 import { GastoTable } from "@/components/GastoTable/GastoTable";
+import { useState } from "react";
 
 interface GastosModuleProps {
   onDataChanged?: () => void;
@@ -12,6 +13,11 @@ interface GastosModuleProps {
  * Módulo de Gastos: integra formulario y tabla en una sección visual cohesiva.
  */
 export function GastosModule({ onDataChanged }: GastosModuleProps) {
+  const [refreshKey, setRefreshKey] = useState(0);
+  const handleGastoChange = () => {
+    setRefreshKey((k) => k + 1);
+    onDataChanged?.();
+  };
   return (
     <section
       id="gastos"
@@ -36,11 +42,11 @@ export function GastosModule({ onDataChanged }: GastosModuleProps) {
           </div>
         </div>
         <div className="flex gap-2">
-          <GastoFormModal onSuccess={onDataChanged} />
+          <GastoFormModal onSuccess={handleGastoChange} />
         </div>
       </div>
 
-      <GastoTable />
+      <GastoTable key={refreshKey} onSuccess={handleGastoChange} />
     </section>
   );
 }

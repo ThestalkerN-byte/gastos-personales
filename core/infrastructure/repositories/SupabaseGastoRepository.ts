@@ -15,12 +15,15 @@ export class SupabaseGastoRepository implements IGastoRepository {
       tarjeta_id: gasto?.tarjeta_id,
     });
 
-    if (error) throw new Error(error.message + 'Error en gasto');
+    if (error) throw new Error(error.message + "Error en gasto");
   }
-  async delete(gasto: Gasto): Promise<void> {
+  async delete(gasto: Gasto): Promise<boolean | void> {
     const { error } = await supabase.from("gastos").delete().eq("id", gasto.id);
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
+    return true;
   }
   async findByUserId(userId: string): Promise<Gasto[]> {
     const { data, error } = await supabase
@@ -52,7 +55,9 @@ export class SupabaseGastoRepository implements IGastoRepository {
       query = query.eq("categoria_id", filters.categoria_id);
     }
 
-    const { data, error } = await query.order("created_at", { ascending: false });
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) throw new Error(error.message);
 
@@ -63,5 +68,16 @@ export class SupabaseGastoRepository implements IGastoRepository {
         createdAt: created ? new Date(created as string) : new Date(),
       } as Gasto;
     });
+  }
+
+  async find(gasto: Gasto): Promise<Gasto> {
+    const { data, error } = await supabase
+      .from("gastos")
+      .select("*")
+      .eq("id", gasto.id)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
   }
 }

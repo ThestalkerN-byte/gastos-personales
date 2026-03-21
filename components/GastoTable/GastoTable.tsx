@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ReembolsoFormModal } from "@/components/ReembolsoForm/ReembolsoForm";
+import { DeleteGastoForm } from "../DeleteGastoForm/DeleteGastoForm";
 
 const MESES = [
   { valor: 1, nombre: "Enero" },
@@ -45,10 +46,7 @@ const MESES = [
   { valor: 12, nombre: "Diciembre" },
 ];
 
-const anios = Array.from(
-  { length: 6 },
-  (_, i) => new Date().getFullYear() - i
-);
+const anios = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
 
 function formatearFecha(fecha: string | Date) {
   const d = typeof fecha === "string" ? new Date(fecha) : fecha;
@@ -71,11 +69,14 @@ interface GastoTableProps {
   tarjetaIdFilter?: string;
   /** Ocultar el selector de tarjeta (para vistas que filtran por tarjeta) */
   hideTarjetaFilter?: boolean;
+  /** Callback opcional para notificar cambios (ej: para refrescar resumen) */
+  onSuccess?: () => void;      
 }
 
 export function GastoTable({
   tarjetaIdFilter,
   hideTarjetaFilter = false,
+  onSuccess
 }: GastoTableProps = {}) {
   const { user } = useUser();
   const [gastos, setGastos] = useState<Gasto[]>([]);
@@ -98,8 +99,12 @@ export function GastoTable({
           usuario_id: user.id,
           mes,
           anio,
-          tarjeta_id: effectiveTarjetaId && effectiveTarjetaId !== "all" ? effectiveTarjetaId : undefined,
-          categoria_id: categoriaId && categoriaId !== "all" ? categoriaId : undefined,
+          tarjeta_id:
+            effectiveTarjetaId && effectiveTarjetaId !== "all"
+              ? effectiveTarjetaId
+              : undefined,
+          categoria_id:
+            categoriaId && categoriaId !== "all" ? categoriaId : undefined,
         }),
         getCategorias(),
         getTarjetas(user.id),
@@ -120,9 +125,7 @@ export function GastoTable({
   }, [cargarDatos]);
 
   if (!user?.id) {
-    return (
-      <p className="text-sm text-destructive">Cargando usuario...</p>
-    );
+    return <p className="text-sm text-destructive">Cargando usuario...</p>;
   }
 
   const getCategoriaNombre = (id: string) =>
@@ -141,7 +144,10 @@ export function GastoTable({
         <div className="flex flex-wrap gap-4 items-end">
           <div className="space-y-2">
             <Label htmlFor="mes">Mes</Label>
-            <Select value={String(mes)} onValueChange={(v) => setMes(Number(v))}>
+            <Select
+              value={String(mes)}
+              onValueChange={(v) => setMes(Number(v))}
+            >
               <SelectTrigger id="mes" className="w-[140px]">
                 <SelectValue placeholder="Mes" />
               </SelectTrigger>
@@ -157,7 +163,10 @@ export function GastoTable({
 
           <div className="space-y-2">
             <Label htmlFor="anio">Año</Label>
-            <Select value={String(anio)} onValueChange={(v) => setAnio(Number(v))}>
+            <Select
+              value={String(anio)}
+              onValueChange={(v) => setAnio(Number(v))}
+            >
               <SelectTrigger id="anio" className="w-[100px]">
                 <SelectValue placeholder="Año" />
               </SelectTrigger>
@@ -233,27 +242,30 @@ export function GastoTable({
             <TableBody>
               {gastos.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-muted-foreground py-8"
+                  >
                     No hay gastos para los filtros seleccionados.
                   </TableCell>
                 </TableRow>
               ) : (
                 gastos.map((gasto) => (
                   <TableRow key={gasto.id}>
-                    <TableCell className="font-medium">{gasto.motivo}</TableCell>
-                    <TableCell>{getCategoriaNombre(gasto.categoria_id)}</TableCell>
+                    <TableCell className="font-medium">
+                      {gasto.motivo}
+                    </TableCell>
+                    <TableCell>
+                      {getCategoriaNombre(gasto.categoria_id)}
+                    </TableCell>
                     <TableCell>
                       {gasto.tarjeta_id
                         ? getTarjetaNombre(gasto.tarjeta_id)
                         : "—"}
                     </TableCell>
+                    <TableCell>{gasto.cantidad_cuotas ?? "—"}</TableCell>
                     <TableCell>
-                      {gasto.cantidad_cuotas ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      {gasto.createdAt
-                        ? formatearFecha(gasto.createdAt)
-                        : "—"}
+                      {gasto.createdAt ? formatearFecha(gasto.createdAt) : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatearMonto(gasto.monto)}
@@ -263,8 +275,9 @@ export function GastoTable({
                         gastoId={gasto.id}
                         gastoMotivo={gasto.motivo}
                         gastoMonto={gasto.monto}
-                        onSuccess={cargarDatos}
+                        onSuccess={onSuccess}
                       />
+                      <DeleteGastoForm onSuccess={onSuccess}  gasto={gasto} />
                     </TableCell>
                   </TableRow>
                 ))
