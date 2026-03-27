@@ -13,11 +13,18 @@ const categoriasRepository = new SupabaseCategoriaRepository()
 const getCategoriasUseCase = new GetCategorias(categoriasRepository)
 
 bot.command('gasto', async (ctx) => {
+    console.log("Gasto command received")
     const categorias = await getCategoriasUseCase.execute()
+    console.log("Categorias fetched")
+    console.log("Categorias:", categorias)
     const [, montoStr, categoriaStr ,...motivoStr] = ctx.message?.text?.split(" ") || [];
+    console.log("Monto:", montoStr)
+    console.log("Categoria:", categoriaStr)
+    console.log("Motivo:", motivoStr)
     const monto =parseFloat(montoStr)
     const categoriaValida = categorias.find((c)=> c.nombre.toLowerCase() === categoriaStr.toLowerCase())
     const motivo = motivoStr.join(" ")
+    console.log("Categoria valida:", categoriaValida)
     if(!categoriaValida){
         await ctx.reply("Categoria no encontrada")
         return
