@@ -1,3 +1,4 @@
+"use server";
 import { GetCategorias } from "@/core/application/uses-cases/GetCategorias";
 import { Categoria } from "@/core/domain/entities/Categorias";
 import { SupabaseCategoriaRepository } from "@/core/infrastructure/repositories/SupabaseCategoriaRepository";
