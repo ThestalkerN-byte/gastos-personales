@@ -12,6 +12,10 @@ const createGastoUseCase = new CreateGasto(createGastoRepository)
 const categoriasRepository = new SupabaseCategoriaRepository()
 const getCategoriasUseCase = new GetCategorias(categoriasRepository)
 
+bot.on('message', async (ctx) => {
+    console.log("Message received")
+    console.log("Message:", ctx.message)
+})
 bot.command('gasto', async (ctx) => {
     console.log("Gasto command received")
     const categorias = await getCategoriasUseCase.execute()
